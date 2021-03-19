@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "541152992881",
+    "project_id": "park-69074",
+    "storage_bucket": "park-69074.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541152992881:android:80f7b75af99022f11e05d0",
+        "android_client_info": {
+          "package_name": "com.example.park"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "541152992881-tk609hgklar4n6ia863efro290kld7ie.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkWzfSHm4wCZjFUJx22GPhwrB_BOcN-_U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "541152992881-tk609hgklar4n6ia863efro290kld7ie.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
