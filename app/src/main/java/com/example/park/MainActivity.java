@@ -33,12 +33,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .add(R.id.map_container_view_fragment, MapsFragment.class, null)
-                    .commit();
-        }
     }
 
     @Override
@@ -46,7 +40,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(checkMapServices()) {
             if(fineLocationPermision) {
-                //---do something
+                getSupportFragmentManager().beginTransaction()
+                        .setReorderingAllowed(true)
+                        .add(R.id.map_container_view_fragment, MapsFragment.class, null)
+                        .commit();
             }else{
                 getLocationPermission();
             }
