@@ -21,11 +21,11 @@ public class User implements Parcelable{
 
     }
 
-    protected User(Parcel in) {
-        email = in.readString();
-        userId = in.readString();
-        username = in.readString();
-        avatar = in.readString();
+    protected User(Parcel parcel) {
+        email = parcel.readString();
+        userId = parcel.readString();
+        username = parcel.readString();
+        avatar = parcel.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
