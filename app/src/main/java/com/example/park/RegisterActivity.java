@@ -30,12 +30,10 @@ public class RegisterActivity extends AppCompatActivity implements
 {
    private static final String TAG = "RegisterActivity";
 
-   //widgets
    private EditText email, password, confirmPassword;
    private ProgressBar progressBar;
 
    //todo Hugarian notation for varaibles
-   //vars
    private FirebaseFirestore mDb;
 
    @Override
@@ -55,11 +53,6 @@ public class RegisterActivity extends AppCompatActivity implements
       hideSoftKeyboard();
    }
 
-   /**
-    * Register a new email and password to Firebase Authentication
-    * @param email
-    * @param password
-    */
    public void registerNewEmail(final String email, String password){
 
       showDialog();
@@ -72,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity implements
 
                     if (task.isSuccessful()){
                        Log.d(TAG, "onComplete: AuthState: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
-
+                       //todo require at least 6 characters for password
                        //insert some default data
                        User user = new User();
                        user.setEmail(email);

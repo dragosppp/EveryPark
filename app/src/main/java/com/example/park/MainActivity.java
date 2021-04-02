@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -46,6 +47,76 @@ public class MainActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+   @Override
+   protected void onResume() {
+      super.onResume();
+      if(checkMapServices()) {
+         if(fineLocationPermission) {
+            getSupportFragmentManager().beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(R.id.map_container_view_fragment, MapsFragment.class, null)
+                    .commit();
+            getLastKnownLocation();
+            //todo maybe move  getLastKnownLocation(); to the fragment
+         }else{
+            getLocationPermission();
+         }
+      }
+   }
+
+   private boolean checkMapServices() {
+      if (arePlayServicesAvailable()) {
+         if (isMapsEnabled()) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   public boolean arePlayServicesAvailable() {
+      Log.d(TAG, "isServicesOK: checking google services version");
+
+      int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
+
+      if (available == ConnectionResult.SUCCESS) {
+         //everything is fine and the user can make map requests
+         Log.d(TAG, "isServicesOK: Google Play Services is working");
+         return true;
+      } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
+         //an error occured but we can resolve it
+         Log.d(TAG, "isServicesOK: an error occured but we can fix it");
+         Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
+         dialog.show();
+      } else {
+         Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
+      }
+      return false;
+   }
+
+   public boolean isMapsEnabled() {
+      final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+      if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+         buildAlertMessageNoGps();
+         return false;
+      }
+      return true;
+   }
+
+   private void buildAlertMessageNoGps() {
+      final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+      builder.setMessage("This application requires GPS to work properly, do you want to enable it?")
+              .setCancelable(false)
+              .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                 public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                    Intent enableGpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivityForResult(enableGpsIntent, PERMISSIONS_REQUEST_ENABLE_GPS);
+                 }
+              });
+      final AlertDialog alert = builder.create();
+      alert.show();
+   }
+
     private void getLastKnownLocation() {
         Log.d(TAG, "getLatsKnownLocation: OK");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -66,55 +137,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(checkMapServices()) {
-            if(fineLocationPermission) {
-                getSupportFragmentManager().beginTransaction()
-                        .setReorderingAllowed(true)
-                        .add(R.id.map_container_view_fragment, MapsFragment.class, null)
-                        .commit();
-                getLastKnownLocation();
-                //todo maybe move  getLastKnownLocation(); to the fragment
-            }else{
-                getLocationPermission();
-            }
-        }
-    }
-
-    private boolean checkMapServices() {
-        if (isServicesOK()) {
-            if (isMapsEnabled()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void buildAlertMessageNoGps() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("This application requires GPS to work properly, do you want to enable it?")
-                .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                        Intent enableGpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivityForResult(enableGpsIntent, PERMISSIONS_REQUEST_ENABLE_GPS);
-                    }
-                });
-        final AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    public boolean isMapsEnabled() {
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessageNoGps();
-            return false;
-        }
-        return true;
-    }
 
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
@@ -127,26 +149,6 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
-    }
-
-    public boolean isServicesOK() {
-        Log.d(TAG, "isServicesOK: checking google services version");
-
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
-
-        if (available == ConnectionResult.SUCCESS) {
-            //everything is fine and the user can make map requests
-            Log.d(TAG, "isServicesOK: Google Play Services is working");
-            return true;
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
-            //an error occured but we can resolve it
-            Log.d(TAG, "isServicesOK: an error occured but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
-            dialog.show();
-        } else {
-            Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
-        }
-        return false;
     }
 
     @Override
@@ -180,4 +182,31 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+   private void signOut(){
+      FirebaseAuth.getInstance().signOut();
+      Intent intent = new Intent(this, LoginActivity.class);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+      startActivity(intent);
+      finish();
+   }
+
+   @Override
+   public boolean onCreateOptionsMenu(Menu menu) {
+      getMenuInflater().inflate(R.menu.main_menu, menu);
+      return super.onCreateOptionsMenu(menu);
+   }
+
+   @Override
+   public boolean onOptionsItemSelected(MenuItem item) {
+      switch(item.getItemId()){
+         case R.id.main_menu_sign_out:{
+            signOut();
+            return true;
+         }
+         default:{
+            return super.onOptionsItemSelected(item);
+         }
+      }
+   }
 }
