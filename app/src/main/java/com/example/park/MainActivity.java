@@ -20,14 +20,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.park.models.User;
+import com.example.park.models.UserLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 
 import static com.example.park.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -35,30 +40,33 @@ import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-    private boolean fineLocationPermission = false;
-    private FusedLocationProviderClient fusedLocationClient;
+   private static final String TAG = "MainActivity";
+   private boolean fineLocationPermission = false;
+   private FusedLocationProviderClient fusedLocationClient;
+   private UserLocation userLocation;
+   private FirebaseFirestore myDb;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      setContentView(R.layout.activity_main);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-    }
+      fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+      myDb = FirebaseFirestore.getInstance();
+   }
 
    @Override
    protected void onResume() {
       super.onResume();
-      if(checkMapServices()) {
-         if(fineLocationPermission) {
+      if (checkMapServices()) {
+         if (fineLocationPermission) {
             getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
                     .add(R.id.map_container_view_fragment, MapsFragment.class, null)
                     .commit();
-            getLastKnownLocation();
+            getUserDetails();
             //todo maybe move  getLastKnownLocation(); to the fragment
-         }else{
+         } else {
             getLocationPermission();
          }
       }
@@ -117,73 +125,113 @@ public class MainActivity extends AppCompatActivity {
       alert.show();
    }
 
-    private void getLastKnownLocation() {
-        Log.d(TAG, "getLatsKnownLocation: OK");
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        fusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+   private void getUserDetails() {
+      if(userLocation == null) {
+         userLocation = new UserLocation();
+         DocumentReference userRef = myDb.collection(getString(R.string.collection_users))
+                 .document(FirebaseAuth.getInstance().getUid());
+         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful()){
-                    Location location = task.getResult();
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    Log.d(TAG, "Geolocation: " + latLng.latitude + ", " + latLng.longitude);
-                }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+               if(task.isSuccessful()){
+                  Log.d(TAG, "onComplete: Succesefully got the user details.");
+                  User user = task.getResult().toObject(User.class);
+                  userLocation.setUser(user);
+                  getLastKnownLocation();
+               }
             }
-        });
-    }
+         });
+      }
+   }
 
+   private void getLastKnownLocation() {
+      Log.d(TAG, "getLatsKnownLocation: OK");
+      if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+              != PackageManager.PERMISSION_GRANTED
+              && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+              != PackageManager.PERMISSION_GRANTED) {
+         return;
+      }
+      fusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+         @Override
+         public void onComplete(@NonNull Task<Location> task) {
+            if (task.isSuccessful()) {
+               Location location = task.getResult();
+               GeoPoint geoPoint= new GeoPoint(location.getLatitude(), location.getLongitude());
+               Log.d(TAG, "Geolocation: " + geoPoint.getLatitude() + ", " + geoPoint.getLatitude());
 
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            fineLocationPermission = true;
-            getLastKnownLocation();
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        fineLocationPermission = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    fineLocationPermission = true;
-                }
+               userLocation.setGeoPoint(geoPoint);
+               userLocation.setTimestamp(null);
+               saveUserLocation();
             }
-        }
-    }
+         }
+      });
+   }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: called.");
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ENABLE_GPS: {
-                if (!fineLocationPermission) {
-                    getLocationPermission();
-                }else{
-                    getLastKnownLocation();
-                }
+   private void saveUserLocation() {
+      if(userLocation != null){
+         DocumentReference locationRef = myDb
+                 .collection(getString(R.string.collection_user_location))
+                 .document(FirebaseAuth.getInstance().getUid());
+         locationRef.set(userLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+               if(task.isSuccessful()){
+                  Log.d(TAG,"saveUserLocation in DB: "
+                          + "\n\t latitude: " + userLocation.getGeoPoint().getLatitude()
+                          + "\n\t longitude: " + userLocation.getGeoPoint().getLongitude());
+               }
             }
-        }
-    }
+         });
+      }
+   }
 
-   private void signOut(){
+   private void getLocationPermission() {
+      if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+              android.Manifest.permission.ACCESS_FINE_LOCATION)
+              == PackageManager.PERMISSION_GRANTED) {
+         fineLocationPermission = true;
+         getUserDetails();
+      } else {
+         ActivityCompat.requestPermissions(this,
+                 new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                 PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+      }
+   }
+
+   @Override
+   public void onRequestPermissionsResult(int requestCode,
+                                          @NonNull String permissions[],
+                                          @NonNull int[] grantResults) {
+      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+      fineLocationPermission = false;
+      switch (requestCode) {
+         case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+               fineLocationPermission = true;
+            }
+         }
+      }
+   }
+
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      super.onActivityResult(requestCode, resultCode, data);
+      Log.d(TAG, "onActivityResult: called.");
+      switch (requestCode) {
+         case PERMISSIONS_REQUEST_ENABLE_GPS: {
+            if (!fineLocationPermission) {
+               getLocationPermission();
+            } else {
+               getUserDetails();
+            }
+         }
+      }
+   }
+
+   private void signOut() {
       FirebaseAuth.getInstance().signOut();
       Intent intent = new Intent(this, LoginActivity.class);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -199,12 +247,12 @@ public class MainActivity extends AppCompatActivity {
 
    @Override
    public boolean onOptionsItemSelected(MenuItem item) {
-      switch(item.getItemId()){
-         case R.id.main_menu_sign_out:{
+      switch (item.getItemId()) {
+         case R.id.main_menu_sign_out: {
             signOut();
             return true;
          }
-         default:{
+         default: {
             return super.onOptionsItemSelected(item);
          }
       }

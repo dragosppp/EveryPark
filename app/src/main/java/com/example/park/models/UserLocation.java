@@ -1,7 +1,5 @@
 package com.example.park.models;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ServerTimestamp;
 
@@ -10,34 +8,26 @@ import java.util.Date;
 
 public class UserLocation {
 
-    private LatLng latLng;
     private GeoPoint geoPoint;
     private @ServerTimestamp Date timestamp;
     private User user;
 
-    public UserLocation(LatLng latLng, GeoPoint geoPoint, Date timestamp, User user) {
-        this.latLng = latLng;
+    public UserLocation( GeoPoint geoPoint, Date timestamp, User user) {
         this.geoPoint = geoPoint;
         this.timestamp = timestamp;
         this.user = user;
     }
 
-    @Override
+   public UserLocation() {
+   }
+
+   @Override
     public String toString() {
         return "UserLocation{" +
-                "latLng=" + latLng +
-                ", geoPoint=" + geoPoint +
+                " geoPoint=" + geoPoint +
                 ", timestamp='" + timestamp + '\'' +
                 ", user=" + user +
                 '}';
-    }
-
-    public LatLng getLatLng() {
-        return latLng;
-    }
-
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
     }
 
     public GeoPoint getGeoPoint() {
