@@ -74,9 +74,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
       this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
    }
 
-   /*
-       ----------------------------- Firebase setup ---------------------------------
-    */
    private void setupFirebaseAuth() {
       Log.d(TAG, "setupFirebaseAuth: started.");
 
@@ -88,34 +85,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
 
-               FirebaseFirestore db = FirebaseFirestore.getInstance();
-               //todo might add persistance storage https://cutt.ly/hceS66F
-               DocumentReference userRef = db.collection(getString(R.string.collection_users))
-                       .document(user.getUid());
-
-               userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                  @Override
-                  public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                     if (task.isSuccessful()) {
-                        Log.d(TAG, "onComplete: successfully set the user client.");
-                        User user = task.getResult().toObject(User.class);
-                        UserClient userClient = new UserClient();
-                        userClient.setUser(user);
-                        //i really hope the last two lines are ok
-                        //((UserClient) (getApplicationContext())).setUser(user);
-                     }
-                  }
-               });
-
                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                startActivity(intent);
                finish();
             } else {
-               // User is signed out
                Log.d(TAG, "onAuthStateChanged:signed_out");
             }
-            // ...
          }
       };
    }

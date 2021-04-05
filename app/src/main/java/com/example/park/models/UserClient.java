@@ -1,6 +1,8 @@
 package com.example.park.models;
 
-public class UserClient {
+import android.app.Application;
+
+public class UserClient extends Application {
 
    private User user = null;
 

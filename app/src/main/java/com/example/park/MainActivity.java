@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.park.models.User;
+import com.example.park.models.UserClient;
 import com.example.park.models.UserLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                   Log.d(TAG, "onComplete: Succesefully got the user details.");
                   User user = task.getResult().toObject(User.class);
                   userLocation.setUser(user);
+                  ((UserClient)getApplicationContext()).setUser(user);
                   getLastKnownLocation();
                }
             }
