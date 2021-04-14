@@ -36,12 +36,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import static com.example.park.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
 public class MainActivity extends AppCompatActivity {
-
-   private static final String TAG = "MainActivity";
+   
    private boolean fineLocationPermission = false;
    private FusedLocationProviderClient fusedLocationClient;
    private UserLocation userLocation;
@@ -61,12 +61,11 @@ public class MainActivity extends AppCompatActivity {
       super.onResume();
       if (checkMapServices()) {
          if (fineLocationPermission) {
+            getUserDetails();
             getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
                     .add(R.id.map_container_view_fragment, MapsFragment.class, null)
                     .commit();
-            getUserDetails();
-            //todo maybe move  getLastKnownLocation(); to the fragment
          } else {
             getLocationPermission();
          }
@@ -83,17 +82,15 @@ public class MainActivity extends AppCompatActivity {
    }
 
    public boolean arePlayServicesAvailable() {
-      Log.d(TAG, "isServicesOK: checking google services version");
+      Log.d(MAIN_TAG, "isServicesOK: checking google services version");
 
       int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
 
       if (available == ConnectionResult.SUCCESS) {
-         //everything is fine and the user can make map requests
-         Log.d(TAG, "isServicesOK: Google Play Services is working");
+         Log.d(MAIN_TAG, "isServicesOK: Google Play Services is working");
          return true;
       } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
-         //an error occured but we can resolve it
-         Log.d(TAG, "isServicesOK: an error occured but we can fix it");
+         Log.d(MAIN_TAG, "isServicesOK: an error occured but we can fix it");
          Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
          dialog.show();
       } else {
@@ -135,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                if(task.isSuccessful()){
-                  Log.d(TAG, "onComplete: Succesefully got the user details.");
+                  Log.d(MAIN_TAG, "Succesefully got the user details.");
                   User user = task.getResult().toObject(User.class);
                   userLocation.setUser(user);
                   ((UserClient)getApplicationContext()).setUser(user);
@@ -143,11 +140,13 @@ public class MainActivity extends AppCompatActivity {
                }
             }
          });
+      } else {
+         getLastKnownLocation();
       }
    }
 
    private void getLastKnownLocation() {
-      Log.d(TAG, "getLatsKnownLocation: OK");
+      Log.d(MAIN_TAG, "getLatsKnownLocation: OK");
       if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
               != PackageManager.PERMISSION_GRANTED
               && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -160,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                Location location = task.getResult();
                GeoPoint geoPoint= new GeoPoint(location.getLatitude(), location.getLongitude());
-               Log.d(TAG, "Geolocation: " + geoPoint.getLatitude() + ", " + geoPoint.getLatitude());
 
                userLocation.setGeoPoint(geoPoint);
                userLocation.setTimestamp(null);
+               Log.d(MAIN_TAG, "UserLocation: " + userLocation);
                saveUserLocation();
             }
          }
@@ -179,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                if(task.isSuccessful()){
-                  Log.d(TAG,"saveUserLocation in DB: "
+                  Log.d(MAIN_TAG,"saveUserLocation in DB: "
                           + "\n\t latitude: " + userLocation.getGeoPoint().getLatitude()
                           + "\n\t longitude: " + userLocation.getGeoPoint().getLongitude());
                }
@@ -221,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       super.onActivityResult(requestCode, resultCode, data);
-      Log.d(TAG, "onActivityResult: called.");
+      Log.d(MAIN_TAG, "onActivityResult: called.");
       switch (requestCode) {
          case PERMISSIONS_REQUEST_ENABLE_GPS: {
             if (!fineLocationPermission) {

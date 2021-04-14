@@ -14,24 +14,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.park.models.User;
-import com.example.park.models.UserClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 import static android.text.TextUtils.isEmpty;
+import static com.example.park.util.Constants.LOGIN_TAG;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
-
-   private static final String TAG = "LoginActivity";
 
    private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -75,14 +68,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
    }
 
    private void setupFirebaseAuth() {
-      Log.d(TAG, "setupFirebaseAuth: started.");
+      Log.d(LOGIN_TAG, "setupFirebaseAuth: started.");
 
       mAuthListener = new FirebaseAuth.AuthStateListener() {
          @Override
          public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
-               Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+               Log.d(LOGIN_TAG, "onAuthStateChanged: signed_in:" + user.getUid());
                Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
 
                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -90,7 +83,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                startActivity(intent);
                finish();
             } else {
-               Log.d(TAG, "onAuthStateChanged:signed_out");
+               Log.d(LOGIN_TAG, "onAuthStateChanged: signed_out");
             }
          }
       };
@@ -114,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
       //check if the fields are filled out
       if (!isEmpty(email.getText().toString())
               && !isEmpty(password.getText().toString())) {
-         Log.d(TAG, "onClick: attempting to authenticate.");
+         Log.d(LOGIN_TAG, "onClick: attempting to authenticate.");
 
          showDialog();
 
