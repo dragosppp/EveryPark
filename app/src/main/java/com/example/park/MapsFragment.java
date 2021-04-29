@@ -49,32 +49,20 @@ public class MapsFragment extends Fragment implements
       });
    }
 
-   @Override
-   public void onMapReady(GoogleMap map) {
-      Log.d(MAP_FRAGMENT_TAG,"onMapReady: Called");
-      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
-              != PackageManager.PERMISSION_GRANTED
-              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
-              != PackageManager.PERMISSION_GRANTED) {
-         return;
-      }
-      map.setMyLocationEnabled(true);
-      googleMap = map;
-   }
-
    @Nullable
    @Override
    public View onCreateView(@NonNull LayoutInflater inflater,
                             @Nullable ViewGroup container,
                             @Nullable Bundle savedInstanceState) {
+      View view = inflater.inflate(R.layout.fragment_maps, container, false);
       Log.d(MAP_FRAGMENT_TAG,"onCreateView: Called");
-      if (savedInstanceState != null) {
-         userLocation = getArguments().getParcelable(USER_LOCATION_KEY);
-         Log.d(MAP_FRAGMENT_TAG,"userlocation_2: " +userLocation);
-      } else {
-         Log.d(MAP_FRAGMENT_TAG,"Null Bundle - SavedInstanceState!");
-      }
-      return inflater.inflate(R.layout.fragment_maps, container, false);
+//      if (savedInstanceState != null) {
+//         userLocation = getArguments().getParcelable(USER_LOCATION_KEY);
+//         Log.d(MAP_FRAGMENT_TAG,"userlocation_2: " +userLocation);
+//      } else {
+//         Log.d(MAP_FRAGMENT_TAG,"Null Bundle - SavedInstanceState!");
+//      }
+      return view;
    }
 
    @Override
@@ -86,6 +74,19 @@ public class MapsFragment extends Fragment implements
       if (mapFragment != null) {
          mapFragment.getMapAsync(this);
       }
+   }
+
+   @Override
+   public void onMapReady(GoogleMap map) {
+      Log.d(MAP_FRAGMENT_TAG,"onMapReady: Called");
+      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+              != PackageManager.PERMISSION_GRANTED
+              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
+              != PackageManager.PERMISSION_GRANTED) {
+         return;
+      }
+      map.setMyLocationEnabled(true);
+      googleMap = map;
    }
 
    @Override

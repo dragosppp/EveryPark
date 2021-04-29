@@ -62,10 +62,6 @@ public class MainActivity extends AppCompatActivity {
       if (checkMapServices()) {
          if (fineLocationPermission) {
             getUserDetails();
-            getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .add(R.id.map_container_view_fragment, MapsFragment.class, null)
-                    .commit();
          } else {
             getLocationPermission();
          }
