@@ -236,6 +236,13 @@ public class MainActivity extends AppCompatActivity {
       finish();
    }
 
+   private void parkShare() {
+      Intent intent = new Intent(this, ParkSharingActivity.class);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+      startActivity(intent);
+      finish();
+   }
+
    @Override
    public boolean onCreateOptionsMenu(Menu menu) {
       getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -247,6 +254,10 @@ public class MainActivity extends AppCompatActivity {
       switch (item.getItemId()) {
          case R.id.main_menu_sign_out: {
             signOut();
+            return true;
+         }
+         case R.id.main_menu_add_parking_spot: {
+            parkShare();
             return true;
          }
          default: {
