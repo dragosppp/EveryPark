@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,7 +42,8 @@ import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LO
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
 public class MainActivity extends AppCompatActivity {
-   
+
+   public static final String EXTRA_USERLOCATION = "UserLocation";
    private boolean fineLocationPermission = false;
    private FusedLocationProviderClient fusedLocationClient;
    private UserLocation userLocation;
@@ -238,7 +240,8 @@ public class MainActivity extends AppCompatActivity {
 
    private void parkShare() {
       Intent intent = new Intent(this, ParkSharingActivity.class);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+      intent.putExtra(EXTRA_USERLOCATION, (Parcelable) userLocation);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//no idea
       startActivity(intent);
       finish();
    }

@@ -1,11 +1,11 @@
 package com.example.park;
 
+import com.example.park.models.UserLocation;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,19 +15,28 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
+import static com.example.park.MainActivity.EXTRA_USERLOCATION;
 import static com.example.park.util.Constants.PARK_SHARE_TAG;
 
 public class ParkSharingActivity extends Activity implements
         OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerDragListener {
 
-   LatLng position = new LatLng(34.6767, 33.04455);
-   final Marker marker_final = null;
+   UserLocation userLocation;
+   LatLng position;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_park_sharing);
+
+      userLocation = getIntent().getExtras().getParcelable(EXTRA_USERLOCATION);
+      if (userLocation == null) {
+         Log.e(PARK_SHARE_TAG, "UserLocation has null value.");
+      }else{
+         position = userLocation.getLatLng();
+         Log.d(PARK_SHARE_TAG, "Position: " + position);
+      }
 
       MapFragment mapFragment = (MapFragment) getFragmentManager()
               .findFragmentById(R.id.map);
@@ -56,8 +65,7 @@ public class ParkSharingActivity extends Activity implements
       map.animateCamera(zoom);
 
       map.addMarker(new MarkerOptions()
-              .title("Shop")
-              .snippet("Is this the right location?")
+              .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_parking_64))
               .position(position))
               .setDraggable(true);
 
@@ -79,18 +87,18 @@ public class ParkSharingActivity extends Activity implements
 
    @Override
    public void onMarkerDrag(Marker marker) {
-      LatLng position = marker.getPosition();
-      Log.d(PARK_SHARE_TAG, "onMarkerDrag");
-      Log.d(PARK_SHARE_TAG, String.format("Dragging to %f:%f",
-              position.latitude,
-              position.longitude));
+//      LatLng position = marker.getPosition();
+//      Log.d(PARK_SHARE_TAG, "onMarkerDrag");
+//      Log.d(PARK_SHARE_TAG, String.format("Dragging to %f:%f",
+//              position.latitude,
+//              position.longitude));
    }
 
    @Override
    public void onMarkerDragEnd(Marker marker) {
       position = marker.getPosition();
       Log.d(PARK_SHARE_TAG, "onMarkerDragEnd");
-      Log.d(getClass().getSimpleName(), String.format("Dragged to %f:%f",
+      Log.d(PARK_SHARE_TAG, String.format("Dragged to %f:%f",
               position.latitude,
               position.longitude));
    }
