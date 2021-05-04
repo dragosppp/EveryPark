@@ -10,14 +10,15 @@ android:focusableInTouchMode="true"
 android:background="#ecf0f1">
 
 <ScrollView
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:id="@+id/sv_park_share" >
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -26,17 +27,14 @@ android:background="#ecf0f1">
             android:layout_height="wrap_content">
 
             <EditText
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:id="@+id/et_park_share_locationsearch" />
-
-            <ImageButton
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:id="@+id/btn_park_share_search"
-                android:layout_weight="0.1"
-                android:background="@drawable/ic_search" />
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:id="@+id/et_park_share_locationsearch"
+                android:hint="Address"
+                android:drawableLeft="@drawable/ic_search"
+                android:background="@android:drawable/editbox_background"/>
         </LinearLayout>
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
