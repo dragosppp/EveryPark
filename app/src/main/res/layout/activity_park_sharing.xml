@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:orientation="vertical"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:descendantFocusability="beforeDescendants"
-android:focusableInTouchMode="true"
-android:background="#ecf0f1">
-
-<ScrollView
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/sv_park_share" >
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    android:background="#ecf0f1">
 
-    <LinearLayout
+    <FrameLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -27,28 +30,18 @@ android:background="#ecf0f1">
             android:layout_height="wrap_content">
 
             <EditText
-                android:layout_width="0dp"
+                android:id="@+id/et_park_share_locationsearch"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:layout_weight="1"
-                android:id="@+id/et_park_share_locationsearch"
                 android:hint="Address"
                 android:drawableLeft="@drawable/ic_search"
-                android:background="@android:drawable/editbox_background"/>
+                android:drawablePadding="9dp"
+                android:paddingStart="15dp"
+                android:padding="10dp"
+                android:background="@drawable/rounded_edittext"
+                tools:ignore="RtlSymmetry" />
         </LinearLayout>
-
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="405dp"
-            android:name="com.google.android.gms.maps.MapFragment"/>
-
-        <ImageButton
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:id="@+id/btn_park_share_show_location"
-            android:background="@drawable/ic_less" />
-    </LinearLayout>
-</ScrollView>
-
+    </FrameLayout>
 </LinearLayout>

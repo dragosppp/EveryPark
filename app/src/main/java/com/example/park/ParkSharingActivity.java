@@ -73,15 +73,6 @@ public class ParkSharingActivity extends Activity implements
       MapFragment mapFragment = (MapFragment) getFragmentManager()
               .findFragmentById(R.id.map);
       mapFragment.getMapAsync(this);
-
-      ImageButton returnback = (ImageButton) findViewById(R.id.btn_park_share_show_location);
-      returnback.setOnClickListener(new View.OnClickListener() {
-         @Override
-         public void onClick(View v) {
-            Toast.makeText(ParkSharingActivity.this.getApplicationContext(),
-                    currentPosition.latitude + ":" + currentPosition.longitude, Toast.LENGTH_LONG).show();
-         }
-      });
    }
 
    @Override
@@ -91,7 +82,7 @@ public class ParkSharingActivity extends Activity implements
          Place place = Autocomplete.getPlaceFromIntent(data);
          marker.setPosition(Objects.requireNonNull(place.getLatLng()));
          setMapFocus(googleMap, place.getLatLng());
-
+         editText.setText(place.getAddress());
       } else if( resultCode == AutocompleteActivity.RESULT_ERROR){
          Status status = Autocomplete.getStatusFromIntent(data);
          Toast.makeText(getApplicationContext(), status.getStatusMessage(), Toast.LENGTH_LONG).show();
