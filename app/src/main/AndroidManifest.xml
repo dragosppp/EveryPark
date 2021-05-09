@@ -21,7 +21,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Park">
-        <activity android:name=".ParkSharingActivity"></activity>
+        <activity android:name=".DatePickerActivity"></activity>
+        <activity android:name=".ParkSharingActivity" />
         <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity">
             <intent-filter>

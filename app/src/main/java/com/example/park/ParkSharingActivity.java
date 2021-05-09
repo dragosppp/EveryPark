@@ -4,6 +4,8 @@ import com.example.park.models.ParkingSpot;
 import com.example.park.models.User;
 import com.example.park.models.UserClient;
 import com.example.park.models.UserLocation;
+import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
+import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
@@ -106,6 +108,10 @@ public class ParkSharingActivity extends Activity implements
             Toast.makeText(ParkSharingActivity.this, "Location is now set", Toast.LENGTH_SHORT).show();
             //todo make button change aspect on click
             //todo add activity for choosing the availability time
+            Intent intent = new Intent(getApplicationContext(), DatePickerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
          }
       });
    }
