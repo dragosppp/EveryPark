@@ -43,7 +43,7 @@ import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
 public class MainActivity extends AppCompatActivity {
 
-   public static final String EXTRA_USERLOCATION = "UserLocation";
+   public static final String EXTRA_USER_LOCATION = "UserLocation";
    private boolean fineLocationPermission = false;
    private FusedLocationProviderClient fusedLocationClient;
    private UserLocation userLocation;
@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
                }
             }
          });
+      }else {
+         Log.e(MAIN_TAG,"saveUserLocation(): userLocation is null.");
       }
    }
 
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
    private void parkShare() {
       Intent intent = new Intent(this, ParkSharingActivity.class);
-      intent.putExtra(EXTRA_USERLOCATION, (Parcelable) userLocation);
+      intent.putExtra(EXTRA_USER_LOCATION, (Parcelable) userLocation);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//no idea
       startActivity(intent);
       finish();

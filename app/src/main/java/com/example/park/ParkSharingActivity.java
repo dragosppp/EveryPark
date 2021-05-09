@@ -1,46 +1,64 @@
 package com.example.park;
 
+import com.example.park.models.ParkingSpot;
+import com.example.park.models.User;
+import com.example.park.models.UserClient;
 import com.example.park.models.UserLocation;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static com.example.park.MainActivity.EXTRA_USERLOCATION;
+import static com.example.park.MainActivity.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.PARK_SHARE_TAG;
 import static com.example.park.util.Constants.AUTOCOMPLETE_REQUEST;
+import static com.example.park.util.Check.*;
 
 public class ParkSharingActivity extends Activity implements
         OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerDragListener {
 
-   UserLocation userLocation;
-   LatLng currentPosition;
-   EditText editText;
-   MarkerOptions markerOptions;
-   Marker marker;
-   GoogleMap googleMap;
+   private UserLocation userLocation;
+   private ParkingSpot parkingSpot;
+   private LatLng currentPosition;
+   private EditText editText;
+   private MarkerOptions markerOptions;
+   private Marker marker;
+   private GoogleMap googleMap;
+   private FirebaseFirestore myDb;
+   private AppCompatButton btnSave;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +66,9 @@ public class ParkSharingActivity extends Activity implements
       setContentView(R.layout.activity_park_sharing);
 
       editText = findViewById(R.id.et_park_share_locationsearch);
+      btnSave = findViewById(R.id.btn_park_share_save);
+
+      myDb = FirebaseFirestore.getInstance();
 
       Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
       editText.setFocusable(false);
@@ -62,7 +83,7 @@ public class ParkSharingActivity extends Activity implements
       });
 
 
-      userLocation = getIntent().getExtras().getParcelable(EXTRA_USERLOCATION);
+      userLocation = getIntent().getExtras().getParcelable(EXTRA_USER_LOCATION);
       if (userLocation == null) {
          Log.e(PARK_SHARE_TAG, "UserLocation has null value.");
       }else{
@@ -73,6 +94,56 @@ public class ParkSharingActivity extends Activity implements
       MapFragment mapFragment = (MapFragment) getFragmentManager()
               .findFragmentById(R.id.map);
       mapFragment.getMapAsync(this);
+
+      setBtnSave();
+   }
+
+   private void setBtnSave(){
+      btnSave.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+            setParkingSpotDetails();
+            Toast.makeText(ParkSharingActivity.this, "Location is now set", Toast.LENGTH_SHORT).show();
+            //todo make button change aspect on click
+            //todo add activity for choosing the availability time
+         }
+      });
+   }
+
+   @RequiresApi(api = Build.VERSION_CODES.O)
+   private void setParkingSpotDetails(){
+      Log.d(PARK_SHARE_TAG, "setParkingSpotDetails: OK");
+
+      if(parkingSpot == null){
+         User user = ((UserClient)getApplicationContext()).getUser();
+         parkingSpot = new ParkingSpot(LatLngToGeoPoint(currentPosition),
+                 true,
+                 Date.from(Instant.now().plus(10, ChronoUnit.DAYS)),
+                 user);
+         //todo: make a ParkingSpotClient singleton instance
+      }else{
+         parkingSpot.setGeoPoint(LatLngToGeoPoint(currentPosition));
+         parkingSpot.setAvailable(true);
+         parkingSpot.setAvailableUntil(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
+      }
+
+      saveParkingSpot();
+   }
+
+   private void saveParkingSpot(){
+      if(parkingSpot!=null){
+         DocumentReference parkingRef = myDb
+                 .collection(getString(R.string.collection_parking_spots))
+                 .document(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()));
+         parkingRef.set(parkingSpot).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+               if(task.isSuccessful()){
+                  Log.d(PARK_SHARE_TAG,"saveParkingSpot in DB: " + "\n\t " + parkingSpot);
+               }
+            }
+         });
+      }
    }
 
    @Override

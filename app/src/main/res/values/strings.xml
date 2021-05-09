@@ -17,4 +17,5 @@
     <!-- Colections -->
     <string name="collection_users">Users</string>
     <string name="collection_user_location">User Location</string>
+    <string name="collection_parking_spots">Parking Spots</string>
 </resources>
