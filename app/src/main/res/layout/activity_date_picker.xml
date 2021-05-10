@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <!-- See also
+        app:picker_selectorColor="@android:color/transparent"
+        app:picker_stepSizeHours="2"
+        app:picker_stepSizeMinutes="5"
+        -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Until when would you like to share the parking space?"
+        android:textAlignment="center"
+        android:textSize="25sp"
+        android:layout_marginBottom="10dp"
+        android:padding="15dp"/>
+
+    <com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker
+        android:id="@+id/single_day_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:picker_cyclic="false"
+        app:picker_dayCount="15"
+        app:picker_itemSpacing="6dp"
+        app:picker_mustBeOnFuture="true"
+        app:picker_selectorColor="@android:color/transparent"
+        app:picker_textAlign="center"
+        app:picker_visibleItemCount="7"
+        app:picker_stepSizeMinutes="15"
+        />
+<!--        app:picker_curved="true"-->
+<!--        app:fontFamily="@font/dinot_bold"-->
+
+</LinearLayout>
