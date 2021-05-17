@@ -4,8 +4,6 @@ import com.example.park.models.ParkingSpot;
 import com.example.park.models.User;
 import com.example.park.models.UserClient;
 import com.example.park.models.UserLocation;
-import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
-import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
@@ -44,9 +42,11 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.example.park.MainActivity.EXTRA_USER_LOCATION;
+import static com.example.park.util.Constants.EXTRA_DATE_PICKER;
 import static com.example.park.util.Constants.PARK_SHARE_TAG;
 import static com.example.park.util.Constants.AUTOCOMPLETE_REQUEST;
 import static com.example.park.util.Check.*;
+import static com.example.park.util.Constants.PICKER_DATE_REQUEST;
 
 public class ParkSharingActivity extends Activity implements
         OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
@@ -61,6 +61,7 @@ public class ParkSharingActivity extends Activity implements
    private GoogleMap googleMap;
    private FirebaseFirestore myDb;
    private AppCompatButton btnSave;
+   private Date availabilityDate;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -104,35 +105,51 @@ public class ParkSharingActivity extends Activity implements
       btnSave.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
-            setParkingSpotDetails();
-            Toast.makeText(ParkSharingActivity.this, "Location is now set", Toast.LENGTH_SHORT).show();
             //todo make button change aspect on click
-            //todo add activity for choosing the availability time
             Intent intent = new Intent(getApplicationContext(), DatePickerActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+            startActivityForResult(intent, PICKER_DATE_REQUEST);
          }
       });
    }
 
-   @RequiresApi(api = Build.VERSION_CODES.O)
-   private void setParkingSpotDetails(){
-      Log.d(PARK_SHARE_TAG, "setParkingSpotDetails: OK");
+   @Override
+   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      super.onActivityResult(requestCode, resultCode, data);
+      if(requestCode == AUTOCOMPLETE_REQUEST && resultCode == RESULT_OK){
+         Place place = Autocomplete.getPlaceFromIntent(data);
+         marker.setPosition(Objects.requireNonNull(place.getLatLng()));
+         setMapFocus(googleMap, place.getLatLng());
+         editText.setText(place.getAddress());
+      } else if( resultCode == AutocompleteActivity.RESULT_ERROR){
+         Status status = Autocomplete.getStatusFromIntent(data);
+         Toast.makeText(getApplicationContext(), status.getStatusMessage(), Toast.LENGTH_LONG).show();
+         Log.e(PARK_SHARE_TAG, "Autocomplete activity result error: " + status.getStatusMessage());
+      }
 
+      else if(requestCode == PICKER_DATE_REQUEST && resultCode == RESULT_OK){
+         Log.d(PARK_SHARE_TAG, "intent data: "+data.toString());
+         availabilityDate = new Date();
+         availabilityDate.setTime(data.getLongExtra(EXTRA_DATE_PICKER, -1));
+         Log.d(PARK_SHARE_TAG, "Parking spot date received:  " + availabilityDate.toString());
+         Toast.makeText(ParkSharingActivity.this, "Location is now set", Toast.LENGTH_SHORT).show();
+         setParkingSpotDetails(availabilityDate);
+         //finish();
+      } else if (requestCode == PICKER_DATE_REQUEST && resultCode == ParkSharingActivity.RESULT_CANCELED) {
+         Log.e(PARK_SHARE_TAG, "Picker date answer canceled. ");
+      }
+   }
+
+   @RequiresApi(api = Build.VERSION_CODES.O)
+   private void setParkingSpotDetails(Date date){
       if(parkingSpot == null){
          User user = ((UserClient)getApplicationContext()).getUser();
-         parkingSpot = new ParkingSpot(LatLngToGeoPoint(currentPosition),
-                 true,
-                 Date.from(Instant.now().plus(10, ChronoUnit.DAYS)),
-                 user);
+         parkingSpot = new ParkingSpot(LatLngToGeoPoint(currentPosition), true, date, user);
          //todo: make a ParkingSpotClient singleton instance
       }else{
          parkingSpot.setGeoPoint(LatLngToGeoPoint(currentPosition));
          parkingSpot.setAvailable(true);
-         parkingSpot.setAvailableUntil(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)));
+         parkingSpot.setAvailableUntil(date);
       }
-
       saveParkingSpot();
    }
 
@@ -149,21 +166,6 @@ public class ParkSharingActivity extends Activity implements
                }
             }
          });
-      }
-   }
-
-   @Override
-   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-      super.onActivityResult(requestCode, resultCode, data);
-      if(requestCode == AUTOCOMPLETE_REQUEST && resultCode == RESULT_OK){
-         Place place = Autocomplete.getPlaceFromIntent(data);
-         marker.setPosition(Objects.requireNonNull(place.getLatLng()));
-         setMapFocus(googleMap, place.getLatLng());
-         editText.setText(place.getAddress());
-      } else if( resultCode == AutocompleteActivity.RESULT_ERROR){
-         Status status = Autocomplete.getStatusFromIntent(data);
-         Toast.makeText(getApplicationContext(), status.getStatusMessage(), Toast.LENGTH_LONG).show();
-         Log.e(PARK_SHARE_TAG, "Autocomplete activity result error: " + status.getStatusMessage());
       }
    }
 
