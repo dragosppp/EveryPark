@@ -41,8 +41,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static com.example.park.MainActivity.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.EXTRA_DATE_PICKER;
+import static com.example.park.util.Constants.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.PARK_SHARE_TAG;
 import static com.example.park.util.Constants.AUTOCOMPLETE_REQUEST;
 import static com.example.park.util.Check.*;
@@ -133,7 +133,7 @@ public class ParkSharingActivity extends Activity implements
          Log.d(PARK_SHARE_TAG, "Parking spot date received:  " + availabilityDate.toString());
          Toast.makeText(ParkSharingActivity.this, "Location is now set", Toast.LENGTH_SHORT).show();
          setParkingSpotDetails(availabilityDate);
-         //finish();
+         returnToMainActivity();
       } else if (requestCode == PICKER_DATE_REQUEST && resultCode == ParkSharingActivity.RESULT_CANCELED) {
          Log.e(PARK_SHARE_TAG, "Picker date answer canceled. ");
       }
@@ -167,6 +167,12 @@ public class ParkSharingActivity extends Activity implements
             }
          });
       }
+   }
+
+   private void returnToMainActivity(){
+      Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+      startActivity(intent);
+      finish();
    }
 
    @Override

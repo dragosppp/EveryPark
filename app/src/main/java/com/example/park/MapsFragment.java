@@ -14,39 +14,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.park.models.ParkingSpot;
 import com.example.park.models.UserLocation;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+import java.util.ArrayList;
+
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
 import static com.example.park.util.Constants.USER_LOCATION_KEY;
 
-
-public class MapsFragment extends Fragment implements
-        GoogleMap.OnCameraMoveStartedListener,
-        GoogleMap.OnCameraMoveListener,
-        GoogleMap.OnCameraMoveCanceledListener,
-        GoogleMap.OnCameraIdleListener,
-        OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
    private UserLocation userLocation;
    private GoogleMap googleMap;
-   private LatLngBounds mapBoundaries;
+   private ArrayList<ParkingSpot> parkingSpotsList = new ArrayList<>();
 
    @Override
    public void onCreate(@Nullable Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       Log.d(MAP_FRAGMENT_TAG,"onCreate: Called");
-      getChildFragmentManager().
-              setFragmentResultListener("requestKey", this, new FragmentResultListener() {
-         @Override
-         public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-            userLocation = bundle.getParcelable(USER_LOCATION_KEY);
-            Log.d(MAP_FRAGMENT_TAG,"userlocation_1: " +userLocation);
-         }
-      });
+
    }
 
    @Nullable
@@ -56,12 +46,6 @@ public class MapsFragment extends Fragment implements
                             @Nullable Bundle savedInstanceState) {
       View view = inflater.inflate(R.layout.fragment_maps, container, false);
       Log.d(MAP_FRAGMENT_TAG,"onCreateView: Called");
-//      if (savedInstanceState != null) {
-//         userLocation = getArguments().getParcelable(USER_LOCATION_KEY);
-//         Log.d(MAP_FRAGMENT_TAG,"userlocation_2: " +userLocation);
-//      } else {
-//         Log.d(MAP_FRAGMENT_TAG,"Null Bundle - SavedInstanceState!");
-//      }
       return view;
    }
 
@@ -87,25 +71,5 @@ public class MapsFragment extends Fragment implements
       }
       map.setMyLocationEnabled(true);
       googleMap = map;
-   }
-
-   @Override
-   public void onCameraIdle() {
-
-   }
-
-   @Override
-   public void onCameraMoveCanceled() {
-
-   }
-
-   @Override
-   public void onCameraMove() {
-
-   }
-
-   @Override
-   public void onCameraMoveStarted(int i) {
-
    }
 }

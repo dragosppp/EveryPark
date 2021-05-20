@@ -9,6 +9,8 @@ public class Constants {
    public static final int AUTOCOMPLETE_REQUEST = 202;
    public static final int PICKER_DATE_REQUEST = 203;
    public static final String USER_LOCATION_KEY = "User Location";
+   public static final String EXTRA_USER_LOCATION = "UserLocation";
+   public static final String EXTRA_PARKING_SPOTS = "Parking spots array key";
    public static final String EXTRA_DATE_PICKER = "Date picker key";
 
    public static final String MAIN_TAG = "A1000";

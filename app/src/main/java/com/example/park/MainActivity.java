@@ -1,6 +1,7 @@
 package com.example.park;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -21,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.park.models.ParkingSpot;
 import com.example.park.models.User;
 import com.example.park.models.UserClient;
 import com.example.park.models.UserLocation;
@@ -31,35 +33,49 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 import static com.example.park.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.example.park.util.Constants.EXTRA_PARKING_SPOTS;
+import static com.example.park.util.Constants.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
 public class MainActivity extends AppCompatActivity {
 
-   public static final String EXTRA_USER_LOCATION = "UserLocation";
+
    private boolean fineLocationPermission = false;
    private FusedLocationProviderClient fusedLocationClient;
    private UserLocation userLocation;
    private FirebaseFirestore myDb;
+   private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
+      Log.d(MAIN_TAG, "onCreate ");
 
       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
       myDb = FirebaseFirestore.getInstance();
+      getParkingSpots();
    }
 
    @Override
    protected void onResume() {
+      Log.d(MAIN_TAG, "onResume ");
       super.onResume();
       if (checkMapServices()) {
          if (fineLocationPermission) {
@@ -68,6 +84,30 @@ public class MainActivity extends AppCompatActivity {
             getLocationPermission();
          }
       }
+   }
+
+   private void getParkingSpots(){
+      Log.d(MAIN_TAG, "getParkingSpots ");
+      CollectionReference parkingRef = myDb.collection(getString(R.string.collection_parking_spots));
+      //ListenerRegistration parkingListener =  parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>()
+       parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+         @Override
+         public void onEvent(@Nullable QuerySnapshot snapshotValue, @Nullable FirebaseFirestoreException error) {
+            if (error != null) {
+               Log.e(MAIN_TAG, "Listener failed to retrieve parking spots: ", error);
+            }else if (snapshotValue != null){
+               for(QueryDocumentSnapshot doc : snapshotValue){
+                  ParkingSpot parkingSpot = doc.toObject(ParkingSpot.class);
+                  if( parkingSpot.isAvailable()){
+                     parkingSpotList.add(parkingSpot);
+                  }
+               }
+            }
+            for( ParkingSpot p : parkingSpotList){
+               Log.d(MAIN_TAG, "Parking spots : " + p.toString());
+            }
+         }
+      });
    }
 
    private boolean checkMapServices() {
@@ -208,7 +248,6 @@ public class MainActivity extends AppCompatActivity {
       fineLocationPermission = false;
       switch (requestCode) {
          case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-            // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                fineLocationPermission = true;
@@ -243,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
    private void parkShare() {
       Intent intent = new Intent(this, ParkSharingActivity.class);
       intent.putExtra(EXTRA_USER_LOCATION, (Parcelable) userLocation);
+      //intent.putParcelableArrayListExtra(EXTRA_PARKING_SPOTS,  parkingSpotList);
       intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//no idea
       startActivity(intent);
       finish();
