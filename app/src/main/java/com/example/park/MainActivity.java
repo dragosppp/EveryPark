@@ -71,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
       myDb = FirebaseFirestore.getInstance();
       getParkingSpots();
+      if (savedInstanceState == null) {
+         getSupportFragmentManager().beginTransaction()
+                 .setReorderingAllowed(true)
+                 .add(R.id.map_container_view_fragment, MapsFragment.class, null)
+                 .commit();
+      }
+
    }
 
    @Override
@@ -104,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                }
             }
             for( ParkingSpot p : parkingSpotList){
-               Log.d(MAIN_TAG, "Parking spots : " + p.toString());
+              Log.d(MAIN_TAG, "Parking spots : " + p.toString());
             }
          }
       });

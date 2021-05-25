@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentResultListener;
 
 import android.Manifest;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import com.example.park.models.ParkingSpot;
 import com.example.park.models.UserLocation;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -36,6 +38,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
    public void onCreate(@Nullable Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       Log.d(MAP_FRAGMENT_TAG,"onCreate: Called");
+
+      FragmentManager fm = getChildFragmentManager();
+      SupportMapFragment supportMapFragment =  SupportMapFragment.newInstance();
+      fm.beginTransaction().replace(R.id.map, supportMapFragment).commit();
+      supportMapFragment.getMapAsync(this);
 
    }
 
