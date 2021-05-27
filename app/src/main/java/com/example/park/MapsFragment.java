@@ -13,24 +13,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.park.models.MapMarker;
+import com.example.park.models.MapMarkerRenderer;
 import com.example.park.models.ParkingSpot;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.maps.android.clustering.ClusterManager;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
-import static com.example.park.util.Check.*;
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
 
@@ -38,6 +36,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
    private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
    private FirebaseFirestore myDb;
+   private ClusterManager<MapMarker> clusterManager;
 
    @Override
    public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,22 +78,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
       }
       map.setMyLocationEnabled(true);
 
-     displayParkingMarkers(map);
+      setUpClusterer(map);
    }
 
-   private void displayParkingMarkers(GoogleMap map){
-      for(ParkingSpot spot: parkingSpotList){
-         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, HH:mm");
-         String availableUntil = dateFormat.format(spot.getAvailableUntil());
-         String snippetMesagge = getDateDiff(getLocalTime(), spot.getAvailableUntil(), TimeUnit.HOURS)
-                 + " more hours";
+   private void setUpClusterer(GoogleMap map) {
+      clusterManager = new ClusterManager<>(getContext(), map);
+      clusterManager.setRenderer(new MapMarkerRenderer(getContext(),map, clusterManager));
+      map.setOnCameraIdleListener(clusterManager);
+      map.setOnMarkerClickListener(clusterManager);
 
-         MarkerOptions markerOptions = new MarkerOptions()
-                 .title(availableUntil)
-                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_red_triangle_64))
-                 .snippet(snippetMesagge)
-                 .position(GeoPointToLatLng(spot.getGeoPoint()));
-         map.addMarker(markerOptions);
+      addMarkersToCluster();
+   }
+
+   private void addMarkersToCluster(){
+      for(ParkingSpot spot: parkingSpotList){
+         MapMarker mapMarker = new MapMarker(spot);
+         clusterManager.addItem(mapMarker);
       }
    }
 

@@ -1,5 +1,9 @@
 package com.example.park.util;
 
+import android.annotation.SuppressLint;
+
+import java.text.SimpleDateFormat;
+
 public class Constants {
 
     public static final int PERMISSIONS_REQUEST_ENABLE_GPS = 101;
@@ -19,5 +23,9 @@ public class Constants {
    public static final String PARK_SHARE_TAG = "A1003";
    public static final String DATE_PICKER_TAG = "A1004";
    public static final String DUMMY_DATA_TAG = "A1005";
+
+   @SuppressLint("SimpleDateFormat")
+   public static final SimpleDateFormat DATE_FORMAT =
+           new SimpleDateFormat("EEE, MMM d, HH:mm");
 
 }
