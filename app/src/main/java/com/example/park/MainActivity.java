@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
    private FusedLocationProviderClient fusedLocationClient;
    private UserLocation userLocation;
    private FirebaseFirestore myDb;
-   private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
       myDb = FirebaseFirestore.getInstance();
-      getParkingSpots();
    }
 
    @Override
@@ -86,30 +84,6 @@ public class MainActivity extends AppCompatActivity {
       }
    }
 
-   private void getParkingSpots(){
-      Log.d(MAIN_TAG, "getParkingSpots ");
-      CollectionReference parkingRef = myDb.collection(getString(R.string.collection_parking_spots));
-      //ListenerRegistration parkingListener =  parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>()
-       parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-         @Override
-         public void onEvent(@Nullable QuerySnapshot snapshotValue, @Nullable FirebaseFirestoreException error) {
-            if (error != null) {
-               Log.e(MAIN_TAG, "Listener failed to retrieve parking spots: ", error);
-            }else if (snapshotValue != null){
-               for(QueryDocumentSnapshot doc : snapshotValue){
-                  ParkingSpot parkingSpot = doc.toObject(ParkingSpot.class);
-                  if( parkingSpot.isAvailable()){
-                     parkingSpotList.add(parkingSpot);
-                  }
-               }
-            }
-            for( ParkingSpot p : parkingSpotList){
-               Log.d(MAIN_TAG, "Parking spots : " + p.toString());
-            }
-         }
-      });
-   }
-
    private boolean checkMapServices() {
       if (arePlayServicesAvailable()) {
          if (isMapsEnabled()) {
@@ -120,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
    }
 
    public boolean arePlayServicesAvailable() {
-      Log.d(MAIN_TAG, "isServicesOK: checking google services version");
-
       int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
 
       if (available == ConnectionResult.SUCCESS) {
@@ -184,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
    }
 
    private void getLastKnownLocation() {
-      Log.d(MAIN_TAG, "getLatsKnownLocation: OK");
       if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
               != PackageManager.PERMISSION_GRANTED
               && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -200,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
 
                userLocation.setGeoPoint(geoPoint);
                userLocation.setTimestamp(null);
-               Log.d(MAIN_TAG, "UserLocation: " + userLocation);
                saveUserLocation();
             }
          }
@@ -216,9 +186,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                if(task.isSuccessful()){
-                  Log.d(MAIN_TAG,"saveUserLocation in DB: "
-                          + "\n\t latitude: " + userLocation.getGeoPoint().getLatitude()
-                          + "\n\t longitude: " + userLocation.getGeoPoint().getLongitude());
+                  Log.d(MAIN_TAG,"saveUserLocation in DB. ");
                }
             }
          });
@@ -259,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
    @Override
    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       super.onActivityResult(requestCode, resultCode, data);
-      Log.d(MAIN_TAG, "onActivityResult: called.");
       switch (requestCode) {
          case PERMISSIONS_REQUEST_ENABLE_GPS: {
             if (!fineLocationPermission) {
