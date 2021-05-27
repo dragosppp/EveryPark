@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentResultListener;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -16,34 +14,37 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.park.models.ParkingSpot;
-import com.example.park.models.UserLocation;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
+import static com.example.park.util.Check.*;
+import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
-import static com.example.park.util.Constants.USER_LOCATION_KEY;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
-   private UserLocation userLocation;
-   private GoogleMap googleMap;
-   private ArrayList<ParkingSpot> parkingSpotsList = new ArrayList<>();
+   private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
+   private FirebaseFirestore myDb;
 
    @Override
    public void onCreate(@Nullable Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       Log.d(MAP_FRAGMENT_TAG,"onCreate: Called");
-
-      FragmentManager fm = getChildFragmentManager();
-      SupportMapFragment supportMapFragment =  SupportMapFragment.newInstance();
-      fm.beginTransaction().replace(R.id.map, supportMapFragment).commit();
-      supportMapFragment.getMapAsync(this);
-
+      myDb = FirebaseFirestore.getInstance();
+      getParkingSpots();
    }
 
    @Nullable
@@ -77,6 +78,47 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
          return;
       }
       map.setMyLocationEnabled(true);
-      googleMap = map;
+
+     displayParkingMarkers(map);
    }
+
+   private void displayParkingMarkers(GoogleMap map){
+      for(ParkingSpot spot: parkingSpotList){
+         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, HH:mm");
+         String availableUntil = dateFormat.format(spot.getAvailableUntil());
+         String snippetMesagge = getDateDiff(getLocalTime(), spot.getAvailableUntil(), TimeUnit.HOURS)
+                 + " more hours";
+
+         MarkerOptions markerOptions = new MarkerOptions()
+                 .title(availableUntil)
+                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_red_triangle_64))
+                 .snippet(snippetMesagge)
+                 .position(GeoPointToLatLng(spot.getGeoPoint()));
+         map.addMarker(markerOptions);
+      }
+   }
+
+   private void getParkingSpots(){
+      Log.d(MAP_FRAGMENT_TAG, "----- getParkingSpots -----");
+      parkingSpotList.clear();
+      CollectionReference parkingRef = myDb.collection(getString(R.string.collection_parking_spots));
+      parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+         @Override
+         public void onEvent(@Nullable QuerySnapshot snapshotValue, @Nullable FirebaseFirestoreException error) {
+            if (error != null) {
+               Log.e(MAIN_TAG, "Listener failed to retrieve parking spots: ", error);
+            }else if (snapshotValue != null){
+               for(QueryDocumentSnapshot doc : snapshotValue){
+                  ParkingSpot parkingSpot = doc.toObject(ParkingSpot.class);
+                  if( parkingSpot.isAvailable()){
+                     parkingSpotList.add(parkingSpot);
+                  }
+               }
+            }
+         }
+      });
+   }
+
+
+
 }

@@ -18,5 +18,6 @@ public class Constants {
    public static final String MAP_FRAGMENT_TAG = "A1002";
    public static final String PARK_SHARE_TAG = "A1003";
    public static final String DATE_PICKER_TAG = "A1004";
+   public static final String DUMMY_DATA_TAG = "A1005";
 
 }

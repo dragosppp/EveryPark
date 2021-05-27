@@ -48,8 +48,9 @@ public class ParkingSpot implements Parcelable {
               "geoPoint= {" + geoPoint.getLatitude() + ", " + geoPoint.getLongitude() + " }"+
               ", available=" + available +
               ", availableUntil=" + availableUntil +
-              ", userEmail=" + user.getEmail() +
+              //", userEmail=" + user.getEmail() +
               '}';
+      //todo solve getEmail on null reference
    }
 
    public GeoPoint getGeoPoint() {
