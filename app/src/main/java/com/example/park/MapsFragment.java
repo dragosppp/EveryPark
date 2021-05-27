@@ -27,13 +27,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.park.util.Check.GeoPointToLatLng;
+import static com.example.park.util.Check.*;
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
 
@@ -97,7 +94,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                  .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_red_triangle_64))
                  .snippet(snippetMesagge)
                  .position(GeoPointToLatLng(spot.getGeoPoint()));
-         Log.d(MAP_FRAGMENT_TAG,markerOptions.toString());
          map.addMarker(markerOptions);
       }
    }
@@ -123,16 +119,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
       });
    }
 
-   private Date getLocalTime(){
-      Date in = new Date();
-      LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
-      Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-      return out;
-   }
 
-   public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
-      long diffInMillies = date2.getTime() - date1.getTime();
-      return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
-   }
 
 }
