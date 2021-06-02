@@ -2,37 +2,48 @@ package com.example.park;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.park.models.MapMarker;
 import com.example.park.models.MapMarkerRenderer;
 import com.example.park.models.ParkingSpot;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.collections.MarkerManager;
 
 import java.util.ArrayList;
 
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, ClusterManager.OnClusterItemClickListener{
 
    private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
    private FirebaseFirestore myDb;
@@ -67,6 +78,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
       }
    }
 
+   @SuppressLint("PotentialBehaviorOverride")
    @Override
    public void onMapReady(GoogleMap map) {
       Log.d(MAP_FRAGMENT_TAG,"onMapReady: Called");
@@ -77,8 +89,39 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
          return;
       }
       map.setMyLocationEnabled(true);
+      LatLng location = new LatLng(44.444,26.103);
+      setMapFocus(map,location );
 
       setUpClusterer(map);
+   }
+
+   @Override
+   public boolean onClusterItemClick(ClusterItem item) {
+      Log.d(MAP_FRAGMENT_TAG,"Cluster item clicked");
+      showBottomSheetDialog();
+      return false;
+   }
+
+   @Override
+   public boolean onMarkerClick(Marker marker) {
+      Log.d(MAP_FRAGMENT_TAG,"Marker clicked");
+      showBottomSheetDialog();
+      return false;
+   }
+
+   private void showBottomSheetDialog() {
+      final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+      bottomSheetDialog.setContentView(R.layout.view_marker_details);
+
+      TextView address = bottomSheetDialog.findViewById(R.id.tv_view_marker_address);
+      AppCompatButton btn = bottomSheetDialog.findViewById(R.id.btn_view_marker);
+      bottomSheetDialog.show();
+   }
+
+   private void setMapFocus(GoogleMap map, LatLng latLng){
+      map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
+      CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+      map.animateCamera(zoom);
    }
 
    private void setUpClusterer(GoogleMap map) {
@@ -86,7 +129,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
       clusterManager.setRenderer(new MapMarkerRenderer(getContext(),map, clusterManager));
       map.setOnCameraIdleListener(clusterManager);
       map.setOnMarkerClickListener(clusterManager);
-
+      clusterManager.setOnClusterItemClickListener(this);
       addMarkersToCluster();
    }
 
@@ -117,7 +160,4 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
          }
       });
    }
-
-
-
 }
