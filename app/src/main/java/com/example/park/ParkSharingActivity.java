@@ -118,6 +118,7 @@ public class ParkSharingActivity extends Activity implements
       if(requestCode == AUTOCOMPLETE_REQUEST && resultCode == RESULT_OK){
          Place place = Autocomplete.getPlaceFromIntent(data);
          marker.setPosition(Objects.requireNonNull(place.getLatLng()));
+         currentPosition = marker.getPosition();
          setMapFocus(googleMap, place.getLatLng());
          editText.setText(place.getAddress());
       } else if( resultCode == AutocompleteActivity.RESULT_ERROR){

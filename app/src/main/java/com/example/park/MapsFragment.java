@@ -9,11 +9,14 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.example.park.models.MapMarker;
@@ -39,11 +42,14 @@ import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.collections.MarkerManager;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, ClusterManager.OnClusterItemClickListener{
+public class MapsFragment extends Fragment implements OnMapReadyCallback,  ClusterManager.OnClusterItemClickListener{
 
    private ArrayList<ParkingSpot> parkingSpotList = new ArrayList<>();
    private FirebaseFirestore myDb;
@@ -98,22 +104,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
    @Override
    public boolean onClusterItemClick(ClusterItem item) {
       Log.d(MAP_FRAGMENT_TAG,"Cluster item clicked");
-      showBottomSheetDialog();
+      showBottomSheetDialog(item);
       return false;
    }
 
-   @Override
-   public boolean onMarkerClick(Marker marker) {
-      Log.d(MAP_FRAGMENT_TAG,"Marker clicked");
-      showBottomSheetDialog();
-      return false;
-   }
-
-   private void showBottomSheetDialog() {
-      final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+   private void showBottomSheetDialog(ClusterItem item) {
+      final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
       bottomSheetDialog.setContentView(R.layout.view_marker_details);
+      bottomSheetDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
       TextView address = bottomSheetDialog.findViewById(R.id.tv_view_marker_address);
+      LatLng latLng = item.getPosition();
+      String text = getCompleteAddressString(latLng.latitude, latLng.longitude);
+      address.setText(text);
+
       AppCompatButton btn = bottomSheetDialog.findViewById(R.id.btn_view_marker);
       bottomSheetDialog.show();
    }
@@ -159,5 +163,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             }
          }
       });
+   }
+
+   private String getCompleteAddressString(double latitude, double longitude) {
+      String strAdd = "";
+      Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+      try {
+         List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+         if (addresses != null) {
+            Address returnedAddress = addresses.get(0);
+            StringBuilder strReturnedAddress = new StringBuilder("");
+
+            for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+               strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+            }
+            strAdd = strReturnedAddress.toString();
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+         Log.e(MAP_FRAGMENT_TAG, e.toString());
+      }
+      return strAdd;
    }
 }
