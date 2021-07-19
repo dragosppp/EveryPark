@@ -41,6 +41,7 @@ import static com.example.park.util.Constants.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
+import static com.example.park.util.DummyDataGenerator.dummySpotsToFirebase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_main);
       Log.d(MAIN_TAG, "onCreate ");
+
+      //generate dummy data for Bucharest
+     // dummySpotsToFirebase(25);
 
       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
       myDb = FirebaseFirestore.getInstance();
@@ -155,11 +159,12 @@ public class MainActivity extends AppCompatActivity {
          public void onComplete(@NonNull Task<Location> task) {
             if (task.isSuccessful()) {
                Location location = task.getResult();
-               GeoPoint geoPoint= new GeoPoint(location.getLatitude(), location.getLongitude());
-
-               userLocation.setGeoPoint(geoPoint);
-               userLocation.setTimestamp(null);
-               saveUserLocation();
+               if(location != null ) {
+                  GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                  userLocation.setGeoPoint(geoPoint);
+                  userLocation.setTimestamp(null);
+                  saveUserLocation();
+               }
             }
          }
       });

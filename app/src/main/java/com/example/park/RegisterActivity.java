@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -31,9 +34,9 @@ public class RegisterActivity extends AppCompatActivity implements
    private static final String TAG = "RegisterActivity";
 
    private EditText email, password, confirmPassword;
+   private CheckBox termsAndConditions;
    private ProgressBar progressBar;
 
-   //todo Hugarian notation for varaibles
    private FirebaseFirestore mDb;
 
    @Override
@@ -41,12 +44,14 @@ public class RegisterActivity extends AppCompatActivity implements
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_register);
 
-      email = (EditText) findViewById(R.id.et_register_email);
-      password = (EditText) findViewById(R.id.et_register_password);
-      confirmPassword = (EditText) findViewById(R.id.et_register_confirm_password);
-      progressBar = (ProgressBar) findViewById(R.id.pb_register);
-
+      email = findViewById(R.id.et_register_email);
+      password = findViewById(R.id.et_register_password);
+      confirmPassword = findViewById(R.id.et_register_confirm_password);
+      progressBar = findViewById(R.id.pb_register);
       findViewById(R.id.btn_register).setOnClickListener(this);
+
+      termsAndConditions = findViewById(R.id.cb_register_terms_conditions);
+      termsAndConditions.setMovementMethod(LinkMovementMethod.getInstance());
 
       mDb = FirebaseFirestore.getInstance();
 

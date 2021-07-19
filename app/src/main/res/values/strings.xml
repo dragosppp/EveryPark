@@ -18,4 +18,11 @@
     <string name="collection_users">Users</string>
     <string name="collection_user_location">User Location</string>
     <string name="collection_parking_spots">Parking Spots</string>
+
+    <!-- Links -->
+    <string name="terms_and_conditions_link">I accept the
+        <a href="https://www.termsfeed.com/blog/terms-conditions-mobile-apps/"> terms and conditions </a>
+    </string>
+    <string name="register_telephone">Telephone</string>
+
 </resources>
