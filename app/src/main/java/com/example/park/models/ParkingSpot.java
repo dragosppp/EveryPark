@@ -50,7 +50,6 @@ public class ParkingSpot implements Parcelable {
               ", availableUntil=" + availableUntil +
               //", userEmail=" + user.getEmail() +
               '}';
-      //todo solve getEmail on null reference
    }
 
    public GeoPoint getGeoPoint() {

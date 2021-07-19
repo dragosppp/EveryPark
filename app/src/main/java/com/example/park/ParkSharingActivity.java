@@ -105,7 +105,6 @@ public class ParkSharingActivity extends Activity implements
       btnSave.setOnClickListener(new View.OnClickListener() {
          @Override
          public void onClick(View v) {
-            //todo make button change aspect on click
             Intent intent = new Intent(getApplicationContext(), DatePickerActivity.class);
             startActivityForResult(intent, PICKER_DATE_REQUEST);
          }
@@ -145,7 +144,6 @@ public class ParkSharingActivity extends Activity implements
       if(parkingSpot == null){
          User user = ((UserClient)getApplicationContext()).getUser();
          parkingSpot = new ParkingSpot(LatLngToGeoPoint(currentPosition), true, date, user);
-         //todo: make a ParkingSpotClient singleton instance
       }else{
          parkingSpot.setGeoPoint(LatLngToGeoPoint(currentPosition));
          parkingSpot.setAvailable(true);
