@@ -41,7 +41,6 @@ import static com.example.park.util.Constants.EXTRA_USER_LOCATION;
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.example.park.util.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
-import static com.example.park.util.DummyDataGenerator.dummySpotsToFirebase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
       Log.d(MAIN_TAG, "onCreate ");
 
       //generate dummy data for Bucharest
-     // dummySpotsToFirebase(25);
+      //dummySpotsToFirebase(10);
 
       fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
       myDb = FirebaseFirestore.getInstance();
@@ -242,9 +241,7 @@ public class MainActivity extends AppCompatActivity {
    private void parkShare() {
       Intent intent = new Intent(this, ParkSharingActivity.class);
       intent.putExtra(EXTRA_USER_LOCATION, (Parcelable) userLocation);
-      //intent.putParcelableArrayListExtra(EXTRA_PARKING_SPOTS,  parkingSpotList);
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);//no idea
-      startActivity(intent);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
       finish();
    }
 

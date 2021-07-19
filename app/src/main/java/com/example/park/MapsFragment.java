@@ -28,7 +28,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.EventListener;
@@ -36,15 +35,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.collections.MarkerManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import static com.example.park.util.Constants.MAIN_TAG;
 import static com.example.park.util.Constants.MAP_FRAGMENT_TAG;
@@ -118,6 +114,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,  Clust
       String text = getCompleteAddressString(latLng.latitude, latLng.longitude);
       address.setText(text);
 
+      //This button does not nothing so far, but it should
       AppCompatButton btn = bottomSheetDialog.findViewById(R.id.btn_view_marker);
       bottomSheetDialog.show();
    }
@@ -145,7 +142,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,  Clust
    }
 
    private void getParkingSpots(){
-      Log.d(MAP_FRAGMENT_TAG, "----- getParkingSpots -----");
       parkingSpotList.clear();
       CollectionReference parkingRef = myDb.collection(getString(R.string.collection_parking_spots));
       parkingRef.addSnapshotListener(new EventListener<QuerySnapshot>() {

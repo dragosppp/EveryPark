@@ -4,21 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 
 import java.util.Date;
 
-import static com.example.park.util.Constants.DATE_PICKER_TAG;
 import static com.example.park.util.Constants.EXTRA_DATE_PICKER;
-import static com.example.park.util.Constants.PARK_SHARE_TAG;
 
 public class DatePickerActivity extends AppCompatActivity {
 
@@ -60,6 +55,3 @@ public class DatePickerActivity extends AppCompatActivity {
       Toast.makeText(this, toDisplay, Toast.LENGTH_SHORT).show();
    }
 }
-
-//singleDateAndTimePicker.setTypeface(Typeface.DEFAULT);
-//singleDateAndTimePicker2.setTypeface(ResourcesCompat.getFont(this, R.font.dinot_regular));

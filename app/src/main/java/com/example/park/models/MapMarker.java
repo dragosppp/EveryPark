@@ -4,10 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.android.clustering.ClusterItem;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static com.example.park.util.Check.GeoPointToLatLng;

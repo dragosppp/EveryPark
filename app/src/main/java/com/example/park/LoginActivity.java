@@ -133,7 +133,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
    @Override
    public void onClick(View view) {
       switch (view.getId()) {
-         //todo use findviewbyid object for switch
          case R.id.tv_login_register: {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);

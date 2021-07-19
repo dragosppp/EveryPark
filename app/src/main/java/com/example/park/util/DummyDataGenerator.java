@@ -1,21 +1,15 @@
 package com.example.park.util;
 
-import android.app.Activity;
 import android.util.Log;
 
-import com.example.park.R;
 import com.example.park.models.ParkingSpot;
 import com.example.park.models.User;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,6 +38,7 @@ public class DummyDataGenerator {
 
       parkingSpot.setAvailable(true);
       parkingSpot.setAvailableUntil(randomDate(minDate,maxDate));
+      //location of Bucharest
       parkingSpot.setGeoPoint(randomGeoPoint(44.43225, 26.10626,4000));
       parkingSpot.setUser(new User());
 
@@ -71,7 +66,7 @@ public class DummyDataGenerator {
 
 
       return LatLngToGeoPoint(new LatLng(foundLatitude,foundLongitude));
-   } //(44.43225, 26.10626,5000)
+   }
 
    private static Date randomDate(Date startDate, Date endDate) {
       long startMillis = startDate.getTime();

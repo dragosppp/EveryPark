@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -101,14 +100,10 @@ public class RegisterActivity extends AppCompatActivity implements
                        Snackbar.make(parentLayout, "Something went wrong.", Snackbar.LENGTH_SHORT).show();
                        hideDialog();
                     }
-                    // ...
                  }
               });
    }
 
-   /**
-    * Redirects the user to the login screen
-    */
    private void redirectLoginScreen(){
       Log.d(TAG, "redirectLoginScreen: redirecting to login screen.");
 
@@ -138,14 +133,11 @@ public class RegisterActivity extends AppCompatActivity implements
          case R.id.btn_register:{
             Log.d(TAG, "onClick: attempting to register.");
 
-            //check for null valued EditText fields
             if(!isEmpty(email.getText().toString())
                     && !isEmpty(password.getText().toString())
                     && !isEmpty(confirmPassword.getText().toString())){
 
-               //check if passwords match
                if(areStringsEqual(password.getText().toString(), confirmPassword.getText().toString())){
-                  //Initiate registration task
                   registerNewEmail(email.getText().toString(), password.getText().toString());
                }else{
                   Toast.makeText(RegisterActivity.this, "Passwords do not Match", Toast.LENGTH_SHORT).show();
